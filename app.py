@@ -13,7 +13,7 @@ st.set_page_config(page_title="EduVox - Vision AI Learning Tool", page_icon="ðŸ“
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
-    api_key = st.secrets[GEMINI_API_KEY]
+    api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=api_key)
 
 # Custom CSS to style the page
