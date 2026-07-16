@@ -1,16 +1,24 @@
 import streamlit as st
 import google.generativeai as genai
-import google.ai.generativelanguage as glm
 from PIL import Image
 from gtts import gTTS
 import base64
-
-# Set API key
-API_KEY = 'AIzaSyASPydGmQEx5L-JaAt1gpiAiddZGMm3cLQ'
-genai.configure(api_key=API_KEY)
+import os
+from dotenv import load_dotenv
 
 # Set page config
 st.set_page_config(page_title="EduVox - Vision AI Learning Tool", page_icon="📚", layout="wide", initial_sidebar_state='collapsed')
+
+# Set API key
+load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    st.error("GEMINI_API_KEY not found in .env")
+    st.stop()
+
+genai.configure(api_key=api_key)
+
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Custom CSS to style the page
 st.markdown("""
@@ -93,15 +101,15 @@ if uploaded_file is not None:
     if st.button("🚀 Generate Description", key='generate_button', help="Click to generate a description and audio for the uploaded image") or uploaded_file is not None:
         try:
             # Create GenerativeModel and generate content
-            model = genai.GenerativeModel('gemini-pro')
+            model = genai.GenerativeModel("gemini-flash-latest")
+            image = Image.open(uploaded_file)
+
+            prompt = """👩‍🏫 You are a teacher.Please analyze the uploaded image and provide a detailed and descriptive explanation of its content as if you are teaching a visually impaired student.Describe all important objects, people, actions, colors, positions,relationships and notable details in simple language."""
+
             response = model.generate_content(
-                glm.Content(parts=[
-                    glm.Part(text="👩‍🏫 You are a teacher. Please analyze the uploaded image and provide a detailed and descriptive explanation of its content as if you are teaching a visually impaired student. Describe all the key elements, objects, people, actions, and any notable features present in the image. Ensure the description is clear, concise, and easy to understand."),
-                    glm.Part(inline_data=glm.Blob(mime_type='image/jpeg', data=bytes_data)),
-                ]),
-                stream=True
+                [prompt, image]
             )
-            response.resolve()
+
 
             # Get description text
             description = response.text
